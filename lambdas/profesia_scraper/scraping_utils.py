@@ -14,11 +14,16 @@ def get_html(url: str) -> str:
     response.raise_for_status()
 
     return response.text
+
+
+def get_soup(url: str) -> BeautifulSoup:
+    html = get_html(url)
+
+    return BeautifulSoup(html, "html.parser")
     
 
 def get_salaries_from_page(url: str) -> list[str]:
-    html = get_html(url)
-    soup = BeautifulSoup(html, "html.parser")
+    soup = get_soup(url)
 
     salaries_html = soup.find_all("span", {"class": "label label-bordered green half-margin-on-top"})
 
@@ -33,7 +38,7 @@ def get_all_salaries(base_url: str) -> list[str]:
     salaries = []
 
     for page_number in range(1, 50 + 1):
-        url = f"{base_url}?page_num={page_number}"
+        url = f"{base_url}/?page_num={page_number}"
 
         logging.info(f"Scraping salaries from {url}")
 
@@ -60,9 +65,11 @@ def get_dict_from_section(section) -> dict[str, str]:
     return section_dict
 
 
-def get_side_panel_sections(soup: BeautifulSoup) -> dict[str, dict[str, str]]:
+def get_side_panel_sections(url: str) -> dict[str, dict[str, str]]:
     """Returns a dictionary with section title as the key and a dictionary as a value"""
     sections_dict = {}
+
+    soup = get_soup(url)
 
     section_filter = ["Pozícia", "Pracovná oblasť", "Ponuky spoločnosti", "Jazykové znalosti"]
 
@@ -80,3 +87,20 @@ def get_side_panel_sections(soup: BeautifulSoup) -> dict[str, dict[str, str]]:
         sections_dict[section_title] = section_dict
 
     return sections_dict
+
+
+def get_card_dict(url: str) -> dict[str, str]:
+    """Returns a dictionary from a card section with value name as key and value amount as value"""
+    result_dict = {}
+
+    soup = get_soup(url)
+
+    lists_html = soup.find("div", {"class": "card"}).find_all("li")
+
+    for listing in lists_html:
+        listing_value = listing.find("span").text.strip()
+        listing_name = listing.text.replace(listing_value, "").strip()
+
+        result_dict[listing_name] = listing_value
+
+    return result_dict
