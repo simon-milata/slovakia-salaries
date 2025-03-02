@@ -1,13 +1,13 @@
 from bs4 import BeautifulSoup
 
-from scraping_utils import get_card_dict
+from scraping_utils import get_side_panel_sections
 
 
-BASE_URL = "https://www.profesia.sk/praca"
-DISTRICTS_URL = f"{BASE_URL}/zoznam-lokalit"
-POSITIONS_URL = f"{BASE_URL}/zoznam-pozicii"
-INDUSTRY_URL = f"{BASE_URL}/zoznam-pracovnych-oblasti"
-LANGUAGES_URL = f"{BASE_URL}/zoznam-jazykovych-znalosti"
+BASE_URL = "https://www.profesia.sk/en/work/"
+DISTRICTS_URL = f"{BASE_URL}/list-of-location"
+POSITIONS_URL = f"{BASE_URL}/list-of-positions"
+INDUSTRY_URL = f"{BASE_URL}/list-of-work-areas"
+LANGUAGES_URL = f"{BASE_URL}/list-of-language-skills"
 
 
 def lambda_handler(event, context) -> None:
