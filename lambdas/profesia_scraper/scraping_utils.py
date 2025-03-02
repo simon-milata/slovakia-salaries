@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
-    datefmt="%H:%M:%S,%f"
+    datefmt="%H:%M:%S"
 )
 
 
@@ -42,7 +42,7 @@ def get_salaries_from_page(url: str) -> list[str]:
     return salaries
 
 
-def get_all_salaries(url: str) -> list[str]:
+def get_salaries_from_pages(url: str) -> list[str]:
     """Returns a list of salaries from 50 pages"""
     salaries = []
 
@@ -54,51 +54,52 @@ def get_all_salaries(url: str) -> list[str]:
     return salaries
 
 
-def get_dict_from_section(section) -> dict[str, str]:
-    """Creates a dictionary from a side panel section"""
+def get_dict_from_section(base_url: str, section: str) -> dict[str, dict[str, str]]:
+    """Returns a dictionary {"region_name": {"count": count, "url": url}} from a section"""
     section_dict = {}
 
-    section_values = section.find_all("li")
+    section_elements = section.find_all("li")
 
-    for value in section_values:
-        if "»" in value.text:
+    for element in section_elements:
+        if "»" in element.text:
             continue
 
-        value_count = value.find("span").text.strip()
-        value_name = value.text.replace(value_count, "").strip()
+        value_count = element.find("span").text.strip()
+        value_name = element.text.replace(value_count, "").strip()
+        value_url = f"{base_url}/{element.find("a").get("href")}"
 
-        section_dict[value_name] = value_count
+        section_dict[value_name] = {"count": value_count, "url": value_url}
 
     return section_dict
 
 
-def get_side_panel_sections(url: str) -> dict[str, dict[str, str]]:
+def get_side_panel_sections(base_url: str) -> dict[str, dict[str, str]]:
     """Returns a dictionary with section title as the key and a dictionary as a value"""
     sections_dict = {}
 
-    soup = get_soup(url)
+    soup = get_soup(base_url)
 
-    section_filter = ["Pozícia", "Pracovná oblasť", "Ponuky spoločnosti", "Jazykové znalosti"]
+    section_filter = ["position", "working area", "jobs from the company", "language skills"]
 
     side_panel = soup.find("div", {"class": "sidebar-left"})
     sections = side_panel.find_all("section")
 
     if not sections:
-        logging.warning(f"HTML not found for {url}. Possible website change.")
+        logging.warning(f"HTML not found for {base_url}. Possible website change.")
         return {}
 
     for section in sections:
-        section_title = section.find("h3", {"class": "panel-title"}).text.strip()
+        section_title = section.find("h3", {"class": "panel-title"}).text.strip().lower()
 
         if section_title in section_filter:
             continue
 
-        section_dict = get_dict_from_section(section)
+        section_dict = get_dict_from_section(base_url, section)
 
         if not section_dict:
             logging.warning(f"No items scraped from section {section_title}.")
         else:
-            logging.info(f"Scraped {len(section_dict)} items from section '{section_title}'.")
+            logging.info(f"Scraped {len(section_dict)} items from '{section_title}' section.")
 
         sections_dict[section_title] = section_dict
 
