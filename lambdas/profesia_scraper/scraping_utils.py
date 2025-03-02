@@ -4,7 +4,11 @@ import logging
 from bs4 import BeautifulSoup
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+    datefmt="%H:%M:%S,%f"
+)
 
 
 def get_html(url: str) -> str:
@@ -27,6 +31,10 @@ def get_salaries_from_page(url: str) -> list[str]:
 
     salaries_html = soup.find_all("span", {"class": "label label-bordered green half-margin-on-top"})
 
+    if not salaries_html:
+        logging.warning(f"No salaries scraped from {url}. Possible website change.")
+        return []
+
     salaries = [salary.text.strip() for salary in salaries_html]
     
     logging.info(f"Scraped {len(salaries)} salaries from {url}\n")
@@ -34,13 +42,12 @@ def get_salaries_from_page(url: str) -> list[str]:
     return salaries
 
 
-def get_all_salaries(base_url: str) -> list[str]:
+def get_all_salaries(url: str) -> list[str]:
+    """Returns a list of salaries from 50 pages"""
     salaries = []
 
     for page_number in range(1, 50 + 1):
-        url = f"{base_url}/?page_num={page_number}"
-
-        logging.info(f"Scraping salaries from {url}")
+        url = f"{url}/?page_num={page_number}"
 
         salaries.extend(get_salaries_from_page(url))
 
@@ -76,6 +83,10 @@ def get_side_panel_sections(url: str) -> dict[str, dict[str, str]]:
     side_panel = soup.find("div", {"class": "sidebar-left"})
     sections = side_panel.find_all("section")
 
+    if not sections:
+        logging.warning(f"HTML not found for {url}. Possible website change.")
+        return {}
+
     for section in sections:
         section_title = section.find("h3", {"class": "panel-title"}).text.strip()
 
@@ -83,6 +94,11 @@ def get_side_panel_sections(url: str) -> dict[str, dict[str, str]]:
             continue
 
         section_dict = get_dict_from_section(section)
+
+        if not section_dict:
+            logging.warning(f"No items scraped from section {section_title}.")
+        else:
+            logging.info(f"Scraped {len(section_dict)} items from section '{section_title}'.")
 
         sections_dict[section_title] = section_dict
 
@@ -97,10 +113,16 @@ def get_card_dict(url: str) -> dict[str, str]:
 
     lists_html = soup.find("div", {"class": "card"}).find_all("li")
 
+    if not lists_html:
+        logging.warning(f"HTML not found for {url}. Possible website change.")
+        return {}
+
     for listing in lists_html:
         listing_value = listing.find("span").text.strip()
         listing_name = listing.text.replace(listing_value, "").strip()
 
         result_dict[listing_name] = listing_value
+
+    logging.info(f"Scraped {len(result_dict)} items from {url}.")
 
     return result_dict
