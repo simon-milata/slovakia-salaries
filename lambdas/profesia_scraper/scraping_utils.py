@@ -47,9 +47,20 @@ def get_salaries_from_pages(url: str) -> list[str]:
     salaries = []
 
     for page_number in range(1, 50 + 1):
-        url = f"{url}/?page_num={page_number}"
+        page_url = f"{url}&page_num={page_number}"
 
-        salaries.extend(get_salaries_from_page(url))
+        salaries.extend(get_salaries_from_page(page_url))
+
+    return salaries
+
+
+def get_all_salaries(regions_dict: dict[str, dict[str, str]]) -> dict[str, list[str]]:
+    """Returns a dictionary with region name as key and list of salaries as value"""
+    salaries = {}
+
+    for region in regions_dict:
+        region_url = regions_dict[region]["url"] + "?salary=1&salary_period=m" # Modify url to only show listings with salary listed
+        salaries[region] = get_salaries_from_pages(region_url)
 
     return salaries
 
@@ -66,7 +77,7 @@ def get_dict_from_section(base_url: str, section: str) -> dict[str, dict[str, st
 
         value_count = element.find("span").text.strip()
         value_name = element.text.replace(value_count, "").strip()
-        value_url = f"{base_url}/{element.find("a").get("href")}"
+        value_url = f"{base_url}{element.find("a").get("href")}"
 
         section_dict[value_name] = {"count": value_count, "url": value_url}
 
