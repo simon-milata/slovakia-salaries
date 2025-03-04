@@ -141,3 +141,26 @@ def get_card_dict(url: str) -> dict[str, str]:
     logging.info(f"Scraped {len(result_dict)} items from {url}.")
 
     return result_dict
+
+
+def get_companies(url: str) -> dict[str, dict[str, str]]:
+    """Returns a dictionary of all companies with company name as key and a dictionary with number of listings and url as value"""
+    companies = {}
+
+    soup = get_soup(url)
+
+    companies_html = soup.find("ul", {"class": "list-reset"}).find_all("li")
+
+    if not companies_html:
+        logging.warning(f"No companies scraped from {url}! Possible website change.")
+
+    for company in companies_html:
+        company_listings_count = company.find("span").text.strip()
+        company_name = company.text.replace(company_listings_count, "").strip()
+        company_url = company.find("a").get("href")
+
+        companies[company_name] = {"number_of_listings": company_listings_count, "url": company_url}
+
+    logging.info(f"Scraped {len(companies)} companies from {url}.")
+
+    return companies

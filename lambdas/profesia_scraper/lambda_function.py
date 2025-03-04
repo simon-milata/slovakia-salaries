@@ -1,19 +1,17 @@
 import json
 
-from scraping_utils import get_side_panel_sections, get_all_salaries
+from scraping_utils import get_side_panel_sections, get_all_salaries, get_companies
 from s3_utils import save_to_s3
 
 
 BASE_URL = "https://www.profesia.sk/en/work"
-DISTRICTS_URL = f"{BASE_URL}/list-of-location"
-POSITIONS_URL = f"{BASE_URL}/list-of-positions"
-INDUSTRY_URL = f"{BASE_URL}/list-of-work-areas"
-LANGUAGES_URL = f"{BASE_URL}/list-of-language-skills"
+COMPANIES_URL = f"{BASE_URL}/list-of-companies/"
 
 
 def lambda_handler(event, context) -> None:
     result_dict = get_side_panel_sections(BASE_URL)
     result_dict["salaries"] = get_all_salaries(result_dict["regions"])
+    result_dict["companies"] = get_companies(COMPANIES_URL)
 
     result_json = json.dumps(result_dict)
 
