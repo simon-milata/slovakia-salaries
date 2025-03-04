@@ -36,8 +36,6 @@ def get_salaries_from_page(url: str) -> list[str]:
         return []
 
     salaries = [salary.text.strip() for salary in salaries_html]
-    
-    logging.info(f"Scraped {len(salaries)} salaries from {url}\n")
 
     return salaries
 
@@ -60,7 +58,12 @@ def get_all_salaries(regions_dict: dict[str, dict[str, str]]) -> dict[str, list[
 
     for region in regions_dict:
         region_url = regions_dict[region]["url"] + "?salary=1&salary_period=m" # Modify url to only show listings with salary listed
-        salaries[region] = get_salaries_from_pages(region_url)
+
+        region_salaries = get_salaries_from_pages(region_url)
+
+        logging.info(f"Scraped {len(region_salaries)} salaries from {region_url}.")
+
+        salaries[region] = region_salaries
 
     return salaries
 
