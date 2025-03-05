@@ -1,6 +1,8 @@
 import os
 import logging
 import datetime
+import gzip
+import json
 
 from dotenv import load_dotenv
 import boto3
@@ -18,14 +20,26 @@ BUCKET = os.getenv("BUCKET")
 S3 = boto3.client("s3")
 
 
+def compress_dict(data: dict) -> bytes:
+    """Converts a dict into a json, encodes it to bytes and compresses it."""
+    logging.info("Compressing data dictionary.")
+
+    data_json = json.dumps(data, ensure_ascii=False)
+    data_bytes = data_json.encode("utf-8")
+
+    return gzip.compress(data_bytes)
+
+
 def get_raw_file_path():
+    """Returns raw file path based on current date."""
     date = datetime.datetime.now().date()
-    file_path = f"raw/{date}/data.json"
+    file_path = f"raw/{date}/data.json.gz"
 
     return file_path
 
 
-def save_to_s3(content):
+def save_to_s3(content: dict):
+    content = compress_dict(content)
     file_path = get_raw_file_path()
 
     logging.info(f"Uploading to {BUCKET}/{file_path}")
@@ -34,5 +48,6 @@ def save_to_s3(content):
             Bucket=BUCKET, 
             Key=file_path, 
             Body=content,
-            ContentType="application/json"
+            ContentType="application/json",
+            ContentEncoding="gzip"
         )

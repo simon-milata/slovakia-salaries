@@ -13,9 +13,7 @@ def lambda_handler(event, context) -> None:
     result_dict["salaries"] = get_all_salaries(result_dict["regions"])
     result_dict["companies"] = get_companies(COMPANIES_URL)
 
-    result_json = json.dumps(result_dict)
-
-    save_to_s3(result_json)
+    save_to_s3(result_dict)
 
 
 if __name__ == "__main__":
