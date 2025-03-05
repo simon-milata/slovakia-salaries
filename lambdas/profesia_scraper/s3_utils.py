@@ -16,6 +16,7 @@ if not "AWS_LAMBDA_FUNCTION_NAME" in os.environ:
 
 
 BUCKET = os.getenv("BUCKET")
+DATA_PATH = os.getenv("DATA_PATH")
 
 S3 = boto3.client("s3")
 
@@ -30,17 +31,17 @@ def compress_dict(data: dict) -> bytes:
     return gzip.compress(data_bytes)
 
 
-def get_raw_file_path():
+def get_raw_file_path(file_name: str):
     """Returns raw file path based on current date."""
     date = datetime.datetime.now().date()
-    file_path = f"raw/{date}/data.json.gz"
+    file_path = f"{DATA_PATH}/{date}/{file_name}.json.gz"
 
     return file_path
 
 
-def save_to_s3(content: dict):
+def save_to_s3(content: dict, file_name: str):
     content = compress_dict(content)
-    file_path = get_raw_file_path()
+    file_path = get_raw_file_path(file_name)
 
     logging.info(f"Uploading to {BUCKET}/{file_path}")
 

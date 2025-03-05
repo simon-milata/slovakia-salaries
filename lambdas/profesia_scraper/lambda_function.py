@@ -9,11 +9,14 @@ COMPANIES_URL = f"{BASE_URL}/list-of-companies/"
 
 
 def lambda_handler(event, context) -> None:
-    result_dict = get_side_panel_sections(BASE_URL)
-    result_dict["salaries"] = get_all_salaries(result_dict["regions"])
-    result_dict["companies"] = get_companies(COMPANIES_URL)
+    stats_dict = get_side_panel_sections(BASE_URL)
+    save_to_s3(stats_dict, "stats")
 
-    save_to_s3(result_dict)
+    salaries_dict = get_all_salaries(stats_dict["regions"])
+    save_to_s3(salaries_dict, "salaries")
+
+    companies_dict = get_companies(COMPANIES_URL)
+    save_to_s3(companies_dict, "companies")
 
 
 if __name__ == "__main__":
