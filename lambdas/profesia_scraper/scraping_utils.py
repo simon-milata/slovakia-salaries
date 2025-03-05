@@ -12,7 +12,8 @@ logging.basicConfig(
 
 
 def get_html(url: str) -> str:
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"}
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
+               "Referer": "https://www.profesia.sk/"}
 
     response = requests.get(url=url, headers=headers)
     response.raise_for_status()
@@ -27,12 +28,13 @@ def get_soup(url: str) -> BeautifulSoup:
     
 
 def get_salaries_from_page(url: str) -> list[str]:
+    """Scrapes all salaries from a url"""
     soup = get_soup(url)
 
     salaries_html = soup.find_all("span", {"class": "label label-bordered green half-margin-on-top"})
 
     if not salaries_html:
-        logging.warning(f"No salaries scraped from {url}. Possible website change.")
+        logging.warning(f"No salaries scraped from {url}. Possible website change?")
         return []
 
     salaries = [salary.text.strip() for salary in salaries_html]
@@ -56,6 +58,10 @@ def get_all_salaries(regions_dict: dict[str, dict[str, str]]) -> dict[str, list[
     """Returns a dictionary with region name as key and list of salaries as value"""
     salaries = {}
 
+    if not regions_dict:
+        logging.warning("Regions data are empty. Unable to get salaries. Possible webstie change?")
+        return {}
+
     for region in regions_dict:
         region_url = regions_dict[region]["url"] + "?salary=1&salary_period=m" # Modify url to only show listings with salary listed
 
@@ -73,6 +79,9 @@ def get_dict_from_section(base_url: str, section: str) -> dict[str, dict[str, st
     section_dict = {}
 
     section_elements = section.find_all("li")
+
+    if not section_elements:
+        logging.warning("Sections not found. Possible website change?")
 
     for element in section_elements:
         if "»" in element.text:
@@ -99,7 +108,7 @@ def get_side_panel_sections(base_url: str) -> dict[str, dict[str, str]]:
     sections = side_panel.find_all("section")
 
     if not sections:
-        logging.warning(f"HTML not found for {base_url}. Possible website change.")
+        logging.warning(f"HTML not found for {base_url}. Possible website change?")
         return {}
 
     for section in sections:
@@ -129,7 +138,7 @@ def get_card_dict(url: str) -> dict[str, str]:
     lists_html = soup.find("div", {"class": "card"}).find_all("li")
 
     if not lists_html:
-        logging.warning(f"HTML not found for {url}. Possible website change.")
+        logging.warning(f"HTML not found for {url}. Possible website change?")
         return {}
 
     for listing in lists_html:
@@ -152,7 +161,8 @@ def get_companies(url: str) -> dict[str, dict[str, str]]:
     companies_html = soup.find("ul", {"class": "list-reset"}).find_all("li")
 
     if not companies_html:
-        logging.warning(f"No companies scraped from {url}! Possible website change.")
+        logging.warning(f"No companies scraped from {url}. Possible website change?")
+        return {}
 
     for company in companies_html:
         company_listings_count = company.find("span").text.strip()
