@@ -4,12 +4,13 @@ import datetime
 import gzip
 import json
 
-from dotenv import load_dotenv
 import boto3
 
 
 # Check if running on lambda
 if not "AWS_LAMBDA_FUNCTION_NAME" in os.environ:
+    from dotenv import load_dotenv
+    
     script_dir = os.path.dirname(os.path.abspath(__file__))
     env_path = os.path.join(script_dir, ".env")
     load_dotenv(env_path)
