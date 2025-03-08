@@ -4,9 +4,9 @@ from config import name_replacements
 
 
 def preprocess(data_dict: dict) -> dict:
+    data_dict = convert_dict_to_lowercase(data_dict)
     data_dict = convert_nested_count_to_int(data_dict)
     data_dict = rename_dict_keys(data_dict, name_replacements)
-    data_dict = convert_dict_to_lowercase(data_dict)
 
     return data_dict
 
