@@ -2,9 +2,9 @@ import json
 import logging
 
 
-from s3_utils import load_raw_file
-from processing.processing import preprocess
-# from processing.stats_processing import process_stats
+from s3_utils import load_raw_file, save_to_s3
+from processing.preprocessing import preprocess
+from processing.stats_processing import process_stats
 
 
 logging.basicConfig(
@@ -24,14 +24,17 @@ def lambda_handler(event, context):
     data_dict = preprocess(data_dict)
 
     if key.endswith("stats.json.gz"):
-        #process_stats(data_dict)
-        pass
+        data_dict = process_stats(data_dict)
+        
     elif key.endswith("salaries.json.gz"):
-        #process_salaries(data_dict)
+        #data_dict = process_salaries(data_dict)
         pass
     elif key.endswith("companies.json.gz"):
-        #process_companies(data_dict)
+        #data_dict = process_companies(data_dict)
         pass
+
+    file_name = key.split("/")[-1].split(".")[0]
+    save_to_s3(data_dict, file_name)
 
 
 if __name__ == "__main__":

@@ -2,30 +2,42 @@ import logging
 
 
 def process_stats(data_dict: str) -> dict:
+    data_dict["salary ranges"] = format_salary_rangrs(data_dict["salary ranges"])
     data_dict["salary ranges"] = remove_hourly_salary_ranges(data_dict["salary ranges"])
     data_dict["salary ranges"] = calculate_salary_ranges(data_dict["salary ranges"])
 
-    print(data_dict["salary ranges"])
+    return data_dict
 
 
-def remove_hourly_salary_ranges(stats_salary_dict: dict) -> dict:
+def format_salary_rangrs(stats_salary_dict: dict) -> dict:
+    """Removes characters and converts to intager"""
     result_dict = {}
     for key, value in stats_salary_dict.items():
         try:
-            pay = key.replace("from", "").replace("eur", "").replace(" ", "").strip()
-            pay = int(pay)
+            salary = key.replace("from", "").replace("eur", "").replace(" ", "").strip()
+            salary = int(salary)
         except (ValueError, TypeError) as e:
-            logging.error(f"Converting key {pay} to int failed. Error: {e}")
+            logging.error(f"Converting key {salary} to int failed. Error: {e}")
             raise
 
-        if pay < 100:
+        result_dict[salary] = value
+    return result_dict
+
+
+def remove_hourly_salary_ranges(stats_salary_dict: dict) -> dict:
+    """Removes hourly salaries"""
+    result_dict = {}
+
+    for key, value in stats_salary_dict.items():
+        if key < 100:
             continue
 
-        result_dict[pay] = value
+        result_dict[key] = value
     return result_dict
 
 
 def calculate_salary_ranges(salary_data_dict: dict) -> dict:
+    """"""
     result_dict = {}
 
     sorted_salary_list = sorted(salary_data_dict.items())

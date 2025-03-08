@@ -4,5 +4,9 @@ name_replacements = {
     "work just from home": "remote",
     "possible partly": "hybrid",
 
-    "salary": "salary ranges"
+    "salary": "salary ranges",
+
+    "internship, work experience": "intership",
+    "agreement-based (temporary jobs)": "agreement-based",
+    "1 day (last 24 hours)": "1 day",
 }
