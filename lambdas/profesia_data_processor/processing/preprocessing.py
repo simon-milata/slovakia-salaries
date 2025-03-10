@@ -5,16 +5,16 @@ from config import name_replacements
 
 def preprocess(data_dict: dict) -> dict:
     data_dict = convert_dict_to_lowercase(data_dict)
-    data_dict = convert_nested_count_to_int(data_dict)
+    data_dict = convert_nested_key_to_int(data_dict)
     data_dict = rename_dict_keys(data_dict, name_replacements)
 
     return data_dict
 
 
-def convert_nested_count_to_int(data_dict: dict) -> dict:
-    """Converts all values nested "count" values to an int"""
+def convert_nested_key_to_int(data_dict: dict, key_to_convert: str) -> dict:
+    """Converts all key_to_convert values in a 1 nested dictonary to an int"""
     for key, value in data_dict.items():
-        data_dict[key] = convert_count_to_int(value)
+        data_dict[key] = convert_key_to_int(value, key_to_convert)
 
     return data_dict
 
@@ -49,14 +49,14 @@ def convert_dict_to_lowercase(d):
 
 
 
-def convert_count_to_int(data_dict: dict) -> dict:
-    """Converts all "count" values to an intager"""
+def convert_key_to_int(data_dict: dict, key_to_convert: str) -> dict:
+    """Converts all key_to_convert values in a dictionary to an intager"""
     for key, value in data_dict.items():
-        if "count" in value:
+        if key_to_convert in value:
             try:
-                value["count"] = int(value["count"].strip().replace(" ", ""))
+                value[key_to_convert] = int(value[key_to_convert].strip().replace(" ", ""))
             except (ValueError, TypeError) as e:
-                logging.error(f"Converting count {value.get("count")} to int failed for key: {key}. Error: {e}")
+                logging.error(f"Converting count {value.get(key_to_convert)} to int failed for key: {key}. Error: {e}")
                 raise
 
     return data_dict
