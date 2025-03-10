@@ -33,9 +33,8 @@ def load_raw_file(key: str) -> dict:
     return json.loads(decompressed_data)
 
 
-def get_processed_file_path(file_name: str):
+def get_processed_file_path(file_name: str, date: str):
     """Returns file path based on current date."""
-    date = datetime.datetime.now().date()
     file_path = f"{DATA_DIRECTORY}/{date}/{file_name}.json.gz"
 
     return file_path
@@ -51,9 +50,9 @@ def compress_dict(data: dict) -> bytes:
     return gzip.compress(data_bytes)
 
 
-def save_to_s3(content: dict, file_name: str):
+def save_to_s3(content: dict, file_name: str, date: str):
     content = compress_dict(content)
-    file_path = get_processed_file_path(file_name)
+    file_path = get_processed_file_path(file_name, date)
 
     logging.info(f"Saving {file_name} data to {BUCKET}/{file_path}.")
 

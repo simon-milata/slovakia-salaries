@@ -17,8 +17,6 @@ logging.basicConfig(
 
 
 def lambda_handler(event, context):
-    logging.debug(event, context)
-
     key = event["Records"][0]["s3"]["object"]["key"]
     data_dict = load_raw_file(key)
     data_dict = convert_dict_to_lowercase(data_dict)
@@ -36,7 +34,8 @@ def lambda_handler(event, context):
         pass
 
     file_name = key.split("/")[-1].split(".")[0]
-    save_to_s3(data_dict, file_name)
+    date = key.split("/")[1]
+    save_to_s3(data_dict, file_name, date)
 
 
 if __name__ == "__main__":
