@@ -3,14 +3,6 @@ import logging
 from config import name_replacements
 
 
-def preprocess(data_dict: dict) -> dict:
-    data_dict = convert_dict_to_lowercase(data_dict)
-    data_dict = convert_nested_key_to_int(data_dict)
-    data_dict = rename_dict_keys(data_dict, name_replacements)
-
-    return data_dict
-
-
 def convert_nested_key_to_int(data_dict: dict, key_to_convert: str) -> dict:
     """Converts all key_to_convert values in a 1 nested dictonary to an int"""
     for key, value in data_dict.items():
@@ -19,17 +11,17 @@ def convert_nested_key_to_int(data_dict: dict, key_to_convert: str) -> dict:
     return data_dict
 
 
-def rename_dict_keys(data_dict: dict, key_mapping: dict) -> dict:
-    """Renames the keys in dictionary based on the key_mapping dictionary."""
+def rename_dict_keys(data_dict: dict) -> dict:
+    """Renames the keys in dictionary based on the name_replacements dictionary."""
     renamed_dict = {}
     
     for key, value in data_dict.items():
         # Rename the key if it's in the mapping, else keep the original key
-        new_key = key_mapping.get(key, key).lower()
+        new_key = name_replacements.get(key, key).lower()
         
         # If the value is a dictionary, rename its keys
         if isinstance(value, dict):
-            value = {key_mapping.get(k, k): v for k, v in value.items()}
+            value = {name_replacements.get(k, k): v for k, v in value.items()}
         
         renamed_dict[new_key] = value
     

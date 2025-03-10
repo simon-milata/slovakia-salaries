@@ -44,7 +44,7 @@ def save_to_s3(content: dict, file_name: str):
     content = compress_dict(content)
     file_path = get_raw_file_path(file_name)
 
-    logging.info(f"Saving file_name data to {BUCKET}/{file_path}.")
+    logging.info(f"Saving {file_name} data to {BUCKET}/{file_path}.")
 
     S3.put_object(
             Bucket=BUCKET, 
