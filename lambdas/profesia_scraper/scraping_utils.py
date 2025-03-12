@@ -81,7 +81,7 @@ def get_dict_from_section(base_url: str, section: str) -> dict[str, dict[str, st
             continue
 
         value_count = element.find("span").text.strip()
-        value_name = element.text.replace(value_count, "").strip()
+        value_name = element.text.removesuffix(value_count).strip()
         value_url = f"{base_url}{element.find("a").get("href")}"
 
         section_dict[value_name] = {"count": value_count, "url": value_url}
@@ -136,7 +136,7 @@ def get_card_dict(url: str) -> dict[str, str]:
 
     for listing in lists_html:
         listing_value = listing.find("span").text.strip()
-        listing_name = listing.text.replace(listing_value, "").strip()
+        listing_name = listing.text.removesuffix(listing_value).strip()
 
         result_dict[listing_name] = listing_value
 
@@ -159,7 +159,7 @@ def get_companies(url: str) -> dict[str, dict[str, str]]:
 
     for company in companies_html:
         company_listings_count = company.find("span").text.strip()
-        company_name = company.text.replace(company_listings_count, "").strip()
+        company_name = company.text.removesuffix(company_listings_count).strip()
         company_url = company.find("a").get("href")
 
         companies[company_name] = {"number_of_listings": company_listings_count, "url": company_url}
