@@ -179,7 +179,7 @@ def parse_companies(companies_html) -> dict:
 
     for company in companies_html:
         company_listings_count = company.find("span").text.strip()
-        company_name = company.text.strip().removesuffix(company_listings_count).strip()
+        company_name = company.find("a").text.strip()
         company_url = company.find("a").get("href")
 
         companies[company_name] = {"number_of_listings": company_listings_count, "url": company_url}
