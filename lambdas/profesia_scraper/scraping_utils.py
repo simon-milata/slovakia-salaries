@@ -49,11 +49,17 @@ def get_salaries_from_pages(url: str) -> list[str]:
 
 def get_all_salaries(regions_dict: dict[str, dict[str, str]]) -> dict[str, list[str]]:
     """Returns a dictionary with region name as key and list of salaries as value"""
-    salaries = {}
-
     if not regions_dict:
         logging.warning("Regions data are empty. Unable to get salaries. Possible webstie change?")
         return {}
+
+    salaries = parse_salaries(regions_dict)
+
+    return salaries
+
+
+def parse_salaries(regions_dict: dict[str, dict[str, str]]) -> dict[str, list[str]]:
+    salaries = {}
 
     for region in regions_dict:
         region_url = regions_dict[region]["url"] + "?salary=1&salary_period=m" # Modify url to only show listings with salary listed
@@ -69,12 +75,18 @@ def get_all_salaries(regions_dict: dict[str, dict[str, str]]) -> dict[str, list[
 
 def get_dict_from_section(base_url: str, section: str) -> dict[str, dict[str, str]]:
     """Returns a dictionary {"region_name": {"count": count, "url": url}} from a section"""
-    section_dict = {}
-
     section_elements = section.find_all("li")
 
     if not section_elements:
         logging.warning("Sections not found. Possible website change?")
+
+    section_dict = parse_section(section_elements, base_url)
+
+    return section_dict
+
+
+def parse_section(section_elements, base_url: str) -> dict:
+    section_dict = {}
 
     for element in section_elements:
         if "»" in element.text:
@@ -147,8 +159,6 @@ def get_card_dict(url: str) -> dict[str, str]:
 
 def get_companies(url: str) -> dict[str, dict[str, str]]:
     """Returns a dictionary of all companies with company name as key and a dictionary with number of listings and url as value"""
-    companies = {}
-
     soup = get_soup(url)
 
     companies_html = soup.find("ul", {"class": "list-reset"}).find_all("li")
@@ -157,13 +167,21 @@ def get_companies(url: str) -> dict[str, dict[str, str]]:
         logging.warning(f"No companies scraped from {url}. Possible website change?")
         return {}
 
+    companies = parse_companies(companies_html)
+
+    logging.info(f"Scraped {len(companies)} companies from {url}.")
+
+    return companies
+
+
+def parse_companies(companies_html) -> dict:
+    companies = {}
+
     for company in companies_html:
         company_listings_count = company.find("span").text.strip()
-        company_name = company.text.removesuffix(company_listings_count).strip()
+        company_name = company.text.strip().removesuffix(company_listings_count).strip()
         company_url = company.find("a").get("href")
 
         companies[company_name] = {"number_of_listings": company_listings_count, "url": company_url}
-
-    logging.info(f"Scraped {len(companies)} companies from {url}.")
 
     return companies
