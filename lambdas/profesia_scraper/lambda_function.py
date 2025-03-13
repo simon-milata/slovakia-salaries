@@ -1,7 +1,10 @@
 import json
 import logging
 
-from scraping_utils import get_side_panel_sections, get_all_salaries, get_companies
+from scraping.scraping_utils import get_html
+from scraping.company_scraping import get_companies
+from scraping.salary_scraping import get_all_salaries
+from scraping.stats_scraping import get_side_panel_sections
 from s3_utils import save_to_s3
 
 
@@ -24,7 +27,8 @@ def lambda_handler(event, context) -> None:
     salaries_dict = get_all_salaries(stats_dict["regions"])
     save_to_s3(salaries_dict, "salaries")
 
-    companies_dict = get_companies(COMPANIES_URL)
+    companies_html = get_html(COMPANIES_URL)
+    companies_dict = get_companies(companies_html)
     save_to_s3(companies_dict, "companies")
 
 
