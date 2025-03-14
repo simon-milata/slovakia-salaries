@@ -33,41 +33,6 @@ def test_companies_scraping():
     assert get_companies(sample_html) == expected
 
 
-def test_salary_with_accomodation_scraping():
-    sample_html = """
-        <ul>
-            <li class="list-row">
-                <h2>
-                    <a id="offer_id" href="offer_href">
-                        <span class="title">Listing Title</span>
-                    </a>
-                </h2>
-                <span class="employer">COMPANY NAME</span>
-                <span title="city" class="job-location">City</span>
-                <span class="label-group">
-                    <a href="offer_href">
-                        <span class="label label-bordered green half-margin-on-top">
-                            <svg class="icon money green">
-                                <use xlink:href="/images/svg/money.svg#Layer_1"></use>
-                            </svg>
-                            260 EUR/month
-                        </span>
-                    </a>
-                </span>
-                <a class="half-margin-on-right" data-dimension16="Accommodation label" href="offer_href">
-                        <span class="label label-bordered purple half-margin-on-top">
-                            <svg class="icon bed purple" viewBox="0 0 20 20">
-                                <use xlink:href="/images/svg/bed.svg#Layer_1"></use>
-                            </svg> Arranged accommodation
-                        </span>
-                    </a>
-            </li>
-        </ul>
-    """
-
-    assert get_salaries_from_page(sample_html) == ["260 EUR/month"]
-
-
 def test_empty_salary():
     sample_html = """
         <ul>
@@ -170,3 +135,40 @@ def test_salary_range_scraping():
     """
 
     assert get_salaries_from_page(sample_html) == ["10 - 16 EUR/hour"]
+
+
+def test_salary_with_accomodation_scraping():
+    sample_html = """
+        <ul>
+            <li class="list-row">
+                <h2>
+                    <a id="offer_id" href="offer_href">
+                        <span class="title">Listing Title</span>
+                    </a>
+                </h2>
+                <span class="employer">COMPANY NAME</span>
+                <span title="city" class="job-location">City</span>
+                <span class="label-group">
+                    <a href="offer_href">
+                        <span class="label label-bordered green half-margin-on-top">
+                            <svg class="icon money green">
+                                <use xlink:href="/images/svg/money.svg#Layer_1"></use>
+                            </svg>
+                            260 EUR/month
+                        </span>
+                    </a>
+                </span>
+                <span>
+                    <a class="half-margin-on-right" data-dimension16="Accommodation label" href="offer_href">
+                        <span class="label label-bordered purple half-margin-on-top">
+                            <svg class="icon bed purple" viewBox="0 0 20 20">
+                                <use xlink:href="/images/svg/bed.svg#Layer_1"></use>
+                            </svg> Arranged accommodation
+                        </span>
+                    </a>
+                </span>
+            </li>
+        </ul>
+    """
+
+    assert get_salaries_from_page(sample_html) == ["260 EUR/month"]
