@@ -17,7 +17,7 @@ def get_salaries_from_page(html: str) -> list[str]:
 
 
 def get_salaries_for_region(url: str) -> list[str]:
-    """Returns a list of salaries from a region"""
+    """Returns a list of salaries for a region"""
     region_salaries = []
 
     for page_number in range(1, 10 + 1):

@@ -1,21 +1,35 @@
 import logging
+import os
 
-from scraping.scraping_utils import get_soup
+from bs4 import BeautifulSoup
 
 
-def get_dict_from_section(base_url: str, section: str) -> dict[str, dict[str, str]]:
+# Check if running on lambda
+if not "AWS_LAMBDA_FUNCTION_NAME" in os.environ:
+    from dotenv import load_dotenv
+    
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    env_path = os.path.join(script_dir, "..", ".env")  # .. to navigate one level up
+    env_path = os.path.abspath(env_path)
+    load_dotenv(env_path)
+
+
+BASE_URL = os.getenv("BASE_URL")
+
+
+def get_dict_from_section(section) -> dict[str, dict[str, str]]:
     """Returns a dictionary {"region_name": {"count": count, "url": url}} from a section"""
     section_elements = section.find_all("li")
 
     if not section_elements:
         logging.warning("Sections not found. Possible website change?")
 
-    section_dict = parse_section(section_elements, base_url)
+    section_dict = parse_section(section_elements)
 
     return section_dict
 
 
-def parse_section(section_elements, base_url: str) -> dict:
+def parse_section(section_elements) -> dict:
     section_dict = {}
 
     for element in section_elements:
@@ -23,27 +37,27 @@ def parse_section(section_elements, base_url: str) -> dict:
             continue
 
         value_count = element.find("span").text.strip()
-        value_name = element.text.removesuffix(value_count).strip()
-        value_url = f"{base_url}{element.find("a").get("href")}"
+        value_name = element.text.strip().removesuffix(value_count).strip()
+        value_url = f"{BASE_URL}{element.find("a").get("href")}"
 
         section_dict[value_name] = {"count": value_count, "url": value_url}
 
     return section_dict
 
 
-def get_side_panel_sections(base_url: str) -> dict[str, dict[str, str]]:
-    """Returns a dictionary with section title as the key and a dictionary as a value"""
+def get_side_panel_sections(html: str) -> dict[str, dict[str, str]]:
+    """Returns a dictionary with section title as the key and a dictionary as a value for sections in the side panel"""
     sections_dict = {}
 
-    soup = get_soup(base_url)
-
     section_filter = ["position", "working area", "jobs from the company", "language skills"]
+
+    soup = BeautifulSoup(html, "html.parser")
 
     side_panel = soup.find("div", {"class": "sidebar-left"})
     sections = side_panel.find_all("section")
 
     if not sections:
-        logging.warning(f"HTML not found for {base_url}. Possible website change?")
+        logging.warning(f"HTML not found for {BASE_URL}. Possible website change?")
         return {}
 
     for section in sections:
@@ -52,7 +66,7 @@ def get_side_panel_sections(base_url: str) -> dict[str, dict[str, str]]:
         if section_title in section_filter:
             continue
 
-        section_dict = get_dict_from_section(base_url, section)
+        section_dict = get_dict_from_section(section)
 
         if not section_dict:
             logging.warning(f"No items scraped from section {section_title}.")
@@ -62,26 +76,3 @@ def get_side_panel_sections(base_url: str) -> dict[str, dict[str, str]]:
         sections_dict[section_title] = section_dict
 
     return sections_dict
-
-
-def get_card_dict(url: str) -> dict[str, str]:
-    """Returns a dictionary from a card section with value name as key and value amount as value"""
-    result_dict = {}
-
-    soup = get_soup(url)
-
-    lists_html = soup.find("div", {"class": "card"}).find_all("li")
-
-    if not lists_html:
-        logging.warning(f"HTML not found for {url}. Possible website change?")
-        return {}
-
-    for listing in lists_html:
-        listing_value = listing.find("span").text.strip()
-        listing_name = listing.text.removesuffix(listing_value).strip()
-
-        result_dict[listing_name] = listing_value
-
-    logging.info(f"Scraped {len(result_dict)} items from {url}.")
-
-    return result_dict
