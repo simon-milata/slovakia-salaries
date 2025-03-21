@@ -1,7 +1,7 @@
 import os
 import logging
 
-from scraping.scraping_utils import get_html
+from scraping.scraping_utils import get_html, get_list_values
 from scraping.company_scraping import get_companies
 from scraping.salary_scraping import get_all_salaries
 from scraping.stats_scraping import get_side_panel_sections
@@ -38,7 +38,7 @@ def lambda_handler(event, context) -> None:
     save_to_s3(salaries_dict, "salaries")
 
     companies_html = get_html(COMPANIES_URL)
-    companies_dict = get_companies(companies_html)
+    companies_dict = get_list_values(companies_html)
     save_to_s3(companies_dict, "companies")
 
 
