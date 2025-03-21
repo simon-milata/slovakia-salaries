@@ -1,4 +1,4 @@
-from scraping.company_scraping import get_companies
+from scraping.scraping_utils import get_list_values
 from scraping.stats_scraping import get_side_panel_sections
 from scraping.salary_scraping import get_salaries_from_page
 
@@ -32,7 +32,7 @@ def test_companies_parsing():
         },
     }
 
-    assert get_companies(sample_html) == expected
+    assert get_list_values(sample_html) == expected
 
 
 def test_empty_salary_parsing():

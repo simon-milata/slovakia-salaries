@@ -24,7 +24,11 @@ def get_list_values(html: str) -> dict[str, dict[str, str]]:
     """Returns a dictionary of all listings with name as key and a dictionary with number of listings and url as value"""
     soup = BeautifulSoup(html, "html.parser")
 
-    listing_type = soup.find("h1").text.strip().split()[-1]
+    # try to get listing type for logging purposes e.g. "companies" except for unit tests
+    try:
+        listing_type = soup.find("h1").text.strip().split()[-1]
+    except AttributeError:
+        listing_type = "listings"
 
     html_elements = soup.find("ul", {"class": "list-reset"}).find_all("li")
 
